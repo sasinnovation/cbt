@@ -1,4 +1,4 @@
-﻿name: Production Pipeline
+﻿name: CI
 
 on:
   push:
@@ -16,11 +16,6 @@ jobs:
           node-version: 20
 
       - run: npm install
-
-      - run: npx prisma generate
-
       - run: npm run lint --if-present
-
       - run: npm test --if-present
-
       - run: npm run build

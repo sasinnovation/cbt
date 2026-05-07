@@ -5,15 +5,12 @@ services:
     build: ./docker
     ports:
       - "3000:3000"
-    environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/appdb
     depends_on:
       - db
       - redis
 
   db:
     image: postgres:15
-    restart: always
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
