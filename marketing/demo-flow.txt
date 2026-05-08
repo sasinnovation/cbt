@@ -1,0 +1,12 @@
+﻿🎥 CBT DEMO FLOW
+
+STEP 1: Login as Admin
+STEP 2: Create Exam (show simplicity)
+STEP 3: Add sample questions
+STEP 4: Student login simulation
+STEP 5: Take exam live
+STEP 6: Show instant results
+STEP 7: Show anti-cheating dashboard
+
+KEY MESSAGE:
+"Everything that takes 3 days manually now takes 3 minutes"

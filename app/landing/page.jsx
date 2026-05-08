@@ -1,21 +1,21 @@
 ﻿export default function LandingPage() {
   return (
     <div style={{ padding: 40 }}>
-      <h1>CBT SaaS Platform</h1>
-      <p>Offline-first Computer Based Testing for Schools</p>
+      <h1>Smart CBT System for Schools</h1>
+
+      <h2>Replace paper exams with a secure, automated CBT platform</h2>
 
       <ul>
-        <li>✔ Offline Exam Mode</li>
-        <li>✔ Anti-Cheat System</li>
-        <li>✔ Multi-School SaaS</li>
-        <li>✔ Instant Result Engine</li>
+        <li>✔ Instant exam creation</li>
+        <li>✔ Automatic result marking</li>
+        <li>✔ Anti-cheating protection</li>
+        <li>✔ Student performance tracking</li>
+        <li>✔ Pay once, use anytime</li>
       </ul>
 
-      <a href="/login">
-        <button style={{ padding: 10, marginTop: 20 }}>
-          Get Started
-        </button>
-      </a>
+      <h3>Start running digital exams in 24 hours</h3>
+
+      <button>Get Started</button>
     </div>
   )
 }
