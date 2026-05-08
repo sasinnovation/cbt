@@ -1,0 +1,7 @@
+﻿apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cbt-health-config
+data:
+  HEALTH_CHECK: "/api/health"
+  TIMEOUT: "5s"

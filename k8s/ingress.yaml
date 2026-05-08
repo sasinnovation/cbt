@@ -1,0 +1,16 @@
+﻿apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cbt-ingress
+spec:
+  rules:
+    - host: cbt.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cbt-service
+                port:
+                  number: 80
