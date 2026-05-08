@@ -13,17 +13,16 @@ export default function ObservabilityDashboard() {
 
   return (
     <div style={{ padding: 40 }}>
-      <h1>📊 System Observability Center</h1>
+      <h1>📡 System Observability Center</h1>
 
-      {!data && <p>Loading system telemetry...</p>}
+      {!data && <p>Loading system insights...</p>}
 
       {data && (
         <>
-          <h3>🪵 Logs: {data.logs.length}</h3>
-          <h3>📈 Requests: {data.metrics.requests}</h3>
-          <h3>❌ Errors: {data.metrics.errors}</h3>
-          <h3>⏱ Avg Response: {data.metrics.avgResponseTime}</h3>
-          <h3>🧭 Traces: {data.traces.length}</h3>
+          <h3>🚨 Errors: {data.errors}</h3>
+          <h3>📡 Events: {data.events}</h3>
+          <h3>⚡ Avg Latency: {data.latency}ms</h3>
+          <h3>📊 Requests: {data.requests}</h3>
         </>
       )}
     </div>
