@@ -1,3 +1,4 @@
+import CBTProvider from '@/components/CBTProvider';
 import ServiceWorkerRegister from '../components/ServiceWorkerRegister';
 export const metadata = {
   title: "CBT SaaS",
@@ -18,6 +19,8 @@ export default function RootLayout({
     </html>
   );
 }
+
+
 
 
 

@@ -1,0 +1,19 @@
+﻿=================================================
+CBT RUNTIME PATCH INSTALLED SUCCESSFULLY
+=================================================
+
+NEXT STEP:
+
+Wrap your app with:
+
+<CBTProvider>
+  {children}
+</CBTProvider>
+
+inside app/layout.jsx or app/layout.tsx
+
+IMPORT:
+
+import CBTProvider from '@/components/CBTProvider';
+
+=================================================
