@@ -27,12 +27,7 @@
       "memory": 3008
     }
   },
-  "builds": [
-    {
-      "src": "apps/api/dist/index.js",
-      "use": "@vercel/node"
-    }
-  ],
+  
   "rewrites": [
     {
       "source": "/api/:path*",
