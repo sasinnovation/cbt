@@ -1,33 +1,27 @@
 ﻿import { supabase } from '@/lib/supabase/client'
 
-export async function GET() {
-  try {
+export async function GET(req) {
 
-    const [schoolsRes, subsRes, paymentsRes] = await Promise.all([
-      supabase.from('schools').select('*'),
-      supabase.from('subscriptions').select('*'),
-      supabase.from('payments').select('*')
-    ])
+  const tenantId = req.headers.get('x-tenant-id')
 
-    const schools = schoolsRes.data || []
-    const subs = subsRes.data || []
-    const payments = paymentsRes.data || []
+  const { data: schools } = await supabase
+    .from('schools')
+    .select('*')
+    .eq('id', tenantId)
 
-    const activeSubs = subs.filter(s => s.status === 'active')
+  const { data: subs } = await supabase
+    .from('subscriptions')
+    .select('*')
+    .eq('school_id', tenantId)
 
-    const revenue = payments.reduce((sum, p) => {
-      return sum + (p.amount || 0)
-    }, 0)
+  const { data: payments } = await supabase
+    .from('payments')
+    .select('*')
+    .eq('school_id', tenantId)
 
-    return Response.json({
-      totalSchools: schools.length,
-      activeSubscriptions: activeSubs.length,
-      totalSubscriptions: subs.length,
-      totalRevenue: revenue,
-      recentPayments: payments.slice(-5)
-    })
-
-  } catch (err) {
-    return Response.json({ error: err.message }, { status: 500 })
-  }
+  return Response.json({
+    schools,
+    subscriptions: subs,
+    payments
+  })
 }
