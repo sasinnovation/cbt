@@ -1,0 +1,23 @@
+﻿version: '3.8'
+
+services:
+  cbt-app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: cbt
+      POSTGRES_PASSWORD: cbtpassword
+      POSTGRES_DB: cbt_db
+    ports:
+      - "5432:5432"

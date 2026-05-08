@@ -1,0 +1,7 @@
+﻿{
+  "scripts": {
+    "docker:build": "docker build -t cbt-saas .",
+    "docker:run": "docker run -p 3000:3000 cbt-saas",
+    "docker:compose": "docker-compose up --build"
+  }
+}
