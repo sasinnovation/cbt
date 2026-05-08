@@ -1,0 +1,32 @@
+﻿=================================================
+OFFLINE DATA PIPELINE INSTALLED
+=================================================
+
+NOW CONNECT THESE INTO EXAM PAGE:
+
+1. LOAD EXAM:
+
+import { fetchExamWithOfflineSupport }
+from '@/lib/pipeline/examFetcher';
+
+const exam = await fetchExamWithOfflineSupport(examId);
+
+-------------------------------------------------
+
+2. SAVE ANSWER:
+
+import { autoSaveAnswer }
+from '@/lib/pipeline/answerAutosave';
+
+await autoSaveAnswer(answer);
+
+-------------------------------------------------
+
+3. SAVE TIMER:
+
+import { persistExamTimer }
+from '@/lib/pipeline/timerPersistence';
+
+await persistExamTimer(examId, timeLeft);
+
+=================================================
