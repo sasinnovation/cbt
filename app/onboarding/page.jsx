@@ -1,34 +1,14 @@
-﻿'use client'
-
-import { useState } from 'react'
-
-export default function Onboarding() {
-  const [step, setStep] = useState(1)
-
+﻿export default function OnboardingPage() {
   return (
     <div style={{ padding: 40 }}>
-      <h1>School Onboarding</h1>
+      <h1>🏫 School Onboarding</h1>
 
-      {step === 1 && (
-        <div>
-          <h3>Step 1: School Info</h3>
-          <button onClick={() => setStep(2)}>Next</button>
-        </div>
-      )}
+      <p>Step 1: Create School Account</p>
+      <p>Step 2: Configure Exams</p>
+      <p>Step 3: Add Students</p>
+      <p>Step 4: Go Live</p>
 
-      {step === 2 && (
-        <div>
-          <h3>Step 2: Payment Setup</h3>
-          <button onClick={() => setStep(3)}>Next</button>
-        </div>
-      )}
-
-      {step === 3 && (
-        <div>
-          <h3>Step 3: Complete Setup</h3>
-          <button>Finish</button>
-        </div>
-      )}
+      <button>Start Setup</button>
     </div>
   )
 }
