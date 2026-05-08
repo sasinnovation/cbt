@@ -1,8 +1,10 @@
-export default function Page() {
+import OfflineExamRunner
+from '@/components/exam/OfflineExamRunner';
+
+export default function ExamPage() {
+
   return (
-    <div style={{padding:'40px',fontSize:'24px'}}>
-      <h1>exam Page</h1>
-      <p>CBT SaaS route initialized successfully.</p>
-    </div>
-  )
+    <OfflineExamRunner examId={1} />
+  );
+
 }

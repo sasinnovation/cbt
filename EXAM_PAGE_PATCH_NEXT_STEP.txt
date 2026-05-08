@@ -1,0 +1,24 @@
+﻿=================================================
+EXAM PAGE INTEGRATION INSTALLED
+=================================================
+
+NOW CONNECT THIS COMPONENT INSIDE:
+
+app/exam/page.jsx
+OR
+app/exam/page.tsx
+
+-------------------------------------------------
+
+IMPORT:
+
+import OfflineExamRunner
+from '@/components/exam/OfflineExamRunner';
+
+-------------------------------------------------
+
+USE:
+
+<OfflineExamRunner examId={1} />
+
+=================================================
