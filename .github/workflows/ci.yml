@@ -1,21 +1,41 @@
-﻿name: CI
+name: CBT Enterprise CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+
+  test:
+
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - run: npm install
-      - run: npm run lint --if-present
-      - run: npm test --if-present
-      - run: npm run build
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+
+      - name: Run Jest
+        run: npm run test
+
+      - name: Run Playwright
+        run: npm run test:e2e
+
+      - name: Build Project
+        run: npm run build

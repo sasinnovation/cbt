@@ -1,0 +1,114 @@
+
+> build
+> next build
+
+Γû▓ Next.js 16.2.6 (Turbopack)
+- Environments: .env.local, .env.production
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 15.9s
+  Running TypeScript ...
+  Finished TypeScript in 8.0s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/84) ...
+  Generating static pages using 3 workers (21/84) 
+  Generating static pages using 3 workers (42/84) 
+  Generating static pages using 3 workers (63/84) 
+Γ£ô Generating static pages using 3 workers (84/84) in 1679ms
+  Finalizing page optimization ...
+
+Route (app)
+Γöî Γùï /
+Γö£ Γùï /_not-found
+Γö£ Γùï /admin
+Γö£ Γùï /admin/agents
+Γö£ Γùï /admin/agents/new
+Γö£ Γùï /admin/ai
+Γö£ Γùï /admin/analytics
+Γö£ Γùï /admin/autonomous
+Γö£ Γùï /admin/cicd
+Γö£ Γùï /admin/command
+Γö£ Γùï /admin/crm
+Γö£ Γùï /admin/crm/new
+Γö£ Γùï /admin/dashboard
+Γö£ Γùï /admin/deployment
+Γö£ Γùï /admin/distributed
+Γö£ Γùï /admin/environment
+Γö£ Γùï /admin/exams
+Γö£ Γùï /admin/exams/create
+Γö£ Γùï /admin/gateway
+Γö£ Γùï /admin/global
+Γö£ Γùï /admin/infra
+Γö£ Γùï /admin/integrity
+Γö£ Γùï /admin/kubernetes
+Γö£ Γùï /admin/live
+Γö£ Γùï /admin/observability
+Γö£ Γùï /admin/payments
+Γö£ Γùï /admin/performance
+Γö£ Γùï /admin/questions
+Γö£ Γùï /admin/queue
+Γö£ Γùï /admin/recovery
+Γö£ Γùï /admin/results
+Γö£ Γùï /admin/revenue
+Γö£ Γùï /admin/schools
+Γö£ Γùï /admin/services
+Γö£ Γùï /admin/settings
+Γö£ Γùï /admin/students
+Γö£ Γùï /admin/warroom
+Γö£ ╞Æ /api/admin/ai
+Γö£ ╞Æ /api/admin/crm
+Γö£ ╞Æ /api/admin/dashboard
+Γö£ ╞Æ /api/admin/exams
+Γö£ ╞Æ /api/admin/observability
+Γö£ ╞Æ /api/admin/overview
+Γö£ ╞Æ /api/admin/queue
+Γö£ ╞Æ /api/agents
+Γö£ ╞Æ /api/analytics
+Γö£ ╞Æ /api/analytics/exam
+Γö£ ╞Æ /api/anti-cheat/log
+Γö£ ╞Æ /api/auth
+Γö£ ╞Æ /api/auth/login
+Γö£ ╞Æ /api/auth/profile
+Γö£ ╞Æ /api/auth/register
+Γö£ ╞Æ /api/exam/[id]
+Γö£ ╞Æ /api/exam/list
+Γö£ ╞Æ /api/exam/submit
+Γö£ ╞Æ /api/exams/[schoolId]
+Γö£ ╞Æ /api/exams/list
+Γö£ ╞Æ /api/exams/upload
+Γö£ ╞Æ /api/gateway
+Γö£ ╞Æ /api/health
+Γö£ ╞Æ /api/realtime
+Γö£ ╞Æ /api/results
+Γö£ ╞Æ /api/results/export
+Γö£ ╞Æ /api/results/list
+Γö£ ╞Æ /api/school
+Γö£ ╞Æ /api/school/create
+Γö£ ╞Æ /api/sync
+Γö£ ╞Æ /api/webhook/paystack
+Γö£ Γùï /dashboard
+Γö£ Γùï /error
+Γö£ Γùï /exam
+Γö£ Γùï /exam-list
+Γö£ Γùï /exam[id]/results
+Γö£ ╞Æ /exam/[id]
+Γö£ ╞Æ /exam/[id]/results
+Γö£ Γùï /exam/create
+Γö£ Γùï /forgot-password
+Γö£ Γùï /landing
+Γö£ Γùï /login
+Γö£ Γùï /onboarding
+Γö£ Γùï /pricing
+Γö£ Γùï /signup
+Γö£ Γùï /simulation
+Γö£ Γùï /student/dashboard
+Γö£ Γùï /super-admin
+Γö£ Γùï /super-admin/dashboard
+Γöö Γùï /support
+
+
+╞Æ Proxy (Middleware)
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+

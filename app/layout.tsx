@@ -1,10 +1,11 @@
+import "@/lib/seedExam"
 import './globals.css'
 import { Toaster } from 'react-hot-toast'
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
 
 export const metadata = {
-  title: 'CBT SaaS - Computer-Based Testing Platform',
-  description: 'Enterprise-grade exam platform with security, analytics, and offline support',
+  title: 'CBT Pro - Modern Computer-Based Testing Platform',
+  description: 'Enterprise-grade online exam platform with security, analytics, and offline support for schools',
 }
 
 export default function RootLayout({
@@ -13,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -26,6 +27,8 @@ export default function RootLayout({
     </html>
   )
 }
+
+
 
 
 

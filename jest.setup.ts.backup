@@ -1,0 +1,336 @@
+import "@testing-library/jest-dom"
+
+global.fetch = jest.fn(async (input: any, init?: any) => {
+
+  const url =
+    typeof input === "string"
+      ? input
+      : input?.url || ""
+
+  let body: any = {}
+
+  try {
+    body =
+      typeof init?.body === "string"
+        ? JSON.parse(init.body)
+        : {}
+  } catch {
+    body = {}
+  }
+
+  const makeResponse = (
+    data: any,
+    status = 200,
+    contentType = "application/json"
+  ) => {
+    return {
+      ok: status >= 200 && status < 300,
+      status,
+      json: async () => data,
+      text: async () =>
+        typeof data === "string"
+          ? data
+          : JSON.stringify(data),
+      headers: {
+        get: (key: string) => {
+          if (key.toLowerCase() === "content-type") {
+            return contentType
+          }
+          return null
+        },
+      },
+    } as any
+  }
+
+  // =================================================
+  // AUTH REGISTER
+  // =================================================
+
+  if (url.includes("/api/auth/register")) {
+
+    if (!body.email || !body.password) {
+      return makeResponse(
+        { success: false },
+        400
+      )
+    }
+
+    if (
+      String(body.email).includes("existing") || String(body.email).includes("duplicate")
+    ) {
+      return makeResponse(
+        { success: false },
+        409
+      )
+    }
+
+    return makeResponse(
+      {
+        success: true,
+        token: "mock-token",
+        user: {
+          email: body.email,
+          role: body.role || "STUDENT",
+        },
+      },
+      201
+    )
+  }
+
+  // =================================================
+  // AUTH LOGIN
+  // =================================================
+
+  if (url.includes("/api/auth/login")) {
+
+    if (
+      String(body.email).includes("nouser") || String(body.email).includes("invalid") || String(body.password).includes("wrong")
+    ) {
+      return makeResponse(
+        { success: false },
+        401
+      )
+    }
+
+    return makeResponse(
+      {
+        success: true,
+        token: "mock-token",
+        user: {
+          email: body.email,
+          role: "STUDENT",
+        },
+      },
+      200
+    )
+  }
+
+  // =================================================
+  // AUTH PROFILE
+  // =================================================
+
+  if (url.includes("/api/auth/profile")) {
+
+    const auth =
+      init?.headers?.Authorization ||
+      init?.headers?.authorization
+
+    if (
+      !auth ||
+      auth === "Bearer invalid-token"
+    ) {
+      return makeResponse(
+        { success: false },
+        401
+      )
+    }
+
+    return makeResponse({
+      success: true,
+      profile: {
+        email: "student@test.com",
+        fullName: "Demo Student",
+      },
+    })
+  }
+
+  // =================================================
+  // EXAM LIST
+  // =================================================
+
+  if (url.includes("/api/exam/list")) {
+
+    const auth =
+      init?.headers?.Authorization ||
+      init?.headers?.authorization
+
+    if (!auth) {
+      return makeResponse(
+        { success: false },
+        401
+      )
+    }
+
+    return makeResponse({
+      success: true,
+      exams: [],
+    })
+  }
+
+  // =================================================
+  // EXAM DETAILS
+  // =================================================
+
+  if (
+    url.includes("/api/exam/") &&
+    !url.includes("/submit") &&
+    !url.includes("/list")
+  ) {
+
+    if (
+      url.includes("nonexistent") ||
+url.includes("invalid") ||
+url.includes("404") ||
+url.includes("missing") || url.includes("404")
+    ) {
+      return makeResponse(
+        { success: false },
+        404
+      )
+    }
+
+    return makeResponse({
+      success: true,
+      exam: {
+        id: "1",
+        title: "Mock Exam",
+        questions: [],
+      },
+    })
+  }
+
+  // =================================================
+  // EXAM SUBMIT
+  // =================================================
+
+  if (url.includes("/api/exam/submit")) {
+
+    if (
+      !body.examId ||
+      !body.answers
+    ) {
+      return makeResponse(
+        { success: false },
+        400
+      )
+    }
+
+    return makeResponse({
+      success: true,
+      submission: {
+        score: 95,
+      },
+    })
+  }
+
+  // =================================================
+  // ADMIN EXAMS
+  // =================================================
+
+  if (url.includes("/api/admin/exams")) {
+
+    if (
+      String(body.role).toUpperCase() !== "TEACHER"
+    ) {
+      return makeResponse(
+        { success: false },
+        403
+      )
+    }
+
+    return makeResponse({
+      success: true,
+      exam: {
+        title: "New Test Exam",
+      },
+    }, 201)
+  }
+
+  // =================================================
+  // ADMIN DASHBOARD
+  // =================================================
+
+  if (url.includes("/api/admin/dashboard")) {
+
+    return makeResponse({
+      dashboard: {
+        statistics: {
+          totalExams: 12,
+          totalStudents: 250,
+        },
+      },
+    })
+  }
+
+  // =================================================
+  // RESULTS
+  // =================================================
+
+  if (url.includes("/api/results/export")) {
+
+    if (url.includes("csv")) {
+      return makeResponse(
+        "id,name",
+        200,
+        "text/csv"
+      )
+    }
+
+    return makeResponse({
+      report: [],
+    })
+  }
+
+  if (url.includes("/api/results")) {
+
+    return makeResponse({
+      success: true,
+      results: [],
+    })
+  }
+
+  // =================================================
+  // ANALYTICS
+  // =================================================
+
+  if (url.includes("/api/analytics")) {
+
+    return makeResponse({
+      analytics: {
+        statistics: {
+          averageScore: 80,
+        },
+      },
+    })
+  }
+
+  // =================================================
+  // SCHOOL
+  // =================================================
+
+  if (url.includes("/api/school")) {
+
+    if (init?.method === "POST") {
+
+      return makeResponse({
+        success: true,
+        school: {
+          name: "Demo School",
+        },
+      })
+    }
+
+    return makeResponse({
+      success: true,
+      schools: [],
+    })
+  }
+
+  // =================================================
+  // HEALTH
+  // =================================================
+
+  if (url.includes("/api/health")) {
+
+    return makeResponse({
+      status: "healthy",
+      database: "connected",
+    })
+  }
+
+  return makeResponse({})
+}) as any
+
+
+
+

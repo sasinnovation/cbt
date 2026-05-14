@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/db/prisma'
 import { authenticateToken, createErrorResponse, createSuccessResponse } from '@/lib/auth/middleware'
-
-const prisma = new PrismaClient()
 
 // Get all exams for a school
 export async function GET(request, { params }) {
@@ -39,8 +37,6 @@ export async function GET(request, { params }) {
   } catch (error) {
     console.error('Get exams error:', error)
     return createErrorResponse('Failed to fetch exams', 500)
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -121,7 +117,5 @@ export async function POST(request, { params }) {
   } catch (error) {
     console.error('Create exam error:', error)
     return createErrorResponse('Failed to create exam', 500)
-  } finally {
-    await prisma.$disconnect()
   }
 }

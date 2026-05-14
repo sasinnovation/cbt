@@ -1,0 +1,24 @@
+
+> build
+> next build
+
+Γû▓ Next.js 16.2.6 (Turbopack)
+- Environments: .env.local, .env.production
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 75s
+  Running TypeScript ...
+Failed to type check.
+
+./app/api/admin/dashboard/route.ts:13:29
+Type error: Property 'role' does not exist on type 'string | JwtPayload'.
+  Property 'role' does not exist on type 'string'.
+
+  11 |
+  12 |     const decoded = verifyToken(token);
+> 13 |     if (!decoded || decoded.role !== "TEACHER") {
+     |                             ^
+  14 |       return NextResponse.json(
+  15 |         { error: "Unauthorized - teachers only" },
+  16 |         { status: 403 }
+Next.js build worker exited with code: 1 and signal: null
