@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { verifyToken } from "@/lib/auth/middleware";
+import { NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
+import { verifyToken } from "@/lib/auth/middleware"
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,85 +10,127 @@ export async function GET(req: NextRequest) {
     }
 
     const decoded = verifyToken(token);
-    if (!decoded || decoded.role !== "TEACHER") {
+    if (!decoded || !["ADMIN", "SUPER_ADMIN", "TEACHER"].includes(decoded.role)) {
       return NextResponse.json(
-        { error: "Unauthorized - teachers only" },
+        { error: "Unauthorized" },
         { status: 403 }
       );
     }
 
-    const teacher = await prisma.teacher.findUnique({
-      where: { userId: decoded.id },
+    // Get school ID based on role
+    let schoolId = null;
+    if (decoded.role === "TEACHER") {
+      const teacher = await prisma.teacher.findUnique({
+        where: { userId: decoded.userId },
+      });
+      schoolId = teacher?.schoolId;
+    } else if (decoded.role === "ADMIN") {
+      // For school admin, we need to get school from context
+      // This is a simplified version - in production you'd have admin-school relationship
+      schoolId = req.headers.get("x-school-id");
+    }
+
+    // Get stats
+    const [
+      totalStudents,
+      totalExams,
+      totalResults,
+      averageScore,
+    ] = await Promise.all([
+      schoolId
+        ? prisma.student.count({ where: { schoolId } })
+        : prisma.student.count(),
+      schoolId
+        ? prisma.exam.count({ where: { schoolId } })
+        : prisma.exam.count(),
+      schoolId
+        ? prisma.result.count({
+            where: {
+              exam: { schoolId }
+            }
+          })
+        : prisma.result.count(),
+      schoolId
+        ? prisma.result.aggregate({
+            where: {
+              exam: { schoolId }
+            },
+            _avg: { percentage: true }
+          })
+        : prisma.result.aggregate({
+            _avg: { percentage: true }
+          }),
+    ]);
+
+    const stats = {
+      totalStudents,
+      totalExams,
+      totalResults,
+      averageScore: averageScore._avg.percentage || 0,
+    };
+
+    // Get recent exams
+    const recentExams = await prisma.exam.findMany({
+      where: schoolId ? { schoolId } : {},
+      take: 5,
+      orderBy: { createdAt: "desc" },
       include: {
-        school: {
+        createdBy: {
           select: {
-            id: true,
-            name: true,
-            _count: {
+            user: {
               select: {
-                students: true,
-                teachers: true,
+                fullName: true,
               },
             },
           },
         },
-      },
-    });
-
-    if (!teacher) {
-      return NextResponse.json(
-        { error: "Teacher not found" },
-        { status: 404 }
-      );
-    }
-
-    // Get statistics
-    const exams = await prisma.exam.findMany({
-      where: { createdById: teacher.id },
-      include: {
         _count: {
           select: {
-            questions: true,
             results: true,
+            questions: true,
           },
         },
       },
     });
 
-    const totalStudents = teacher.school._count.students;
-    const totalExams = exams.length;
-    const totalResults = exams.reduce((sum, e) => sum + e._count.results, 0);
-    const averageScore =
-      totalResults > 0
-        ? (
-            await prisma.result.aggregate({
-              where: { schoolId: teacher.schoolId },
-              _avg: { score: true },
-            })
-          )._avg.score || 0
-        : 0;
+    // Get recent results
+    const recentResults = await prisma.result.findMany({
+      where: schoolId ? { exam: { schoolId } } : {},
+      take: 10,
+      orderBy: { createdAt: "desc" },
+      include: {
+        student: {
+          select: {
+            user: {
+              select: {
+                fullName: true,
+              },
+            },
+          },
+        },
+        exam: {
+          select: {
+            title: true,
+          },
+        },
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      dashboard: {
-        teacher: {
-          id: teacher.id,
-          name: teacher.user?.fullName,
-        },
-        school: teacher.school,
-        statistics: {
-          totalStudents,
-          totalExams,
-          totalResults,
-          averageScore: Math.round(averageScore * 100) / 100,
-        },
-        recentExams: exams.slice(0, 5),
-      },
+      stats,
+      recentExams,
+      recentResults,
     });
+
   } catch (error) {
-    console.error("Admin dashboard error:", error);
+    console.error("Dashboard error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        success: false,
+        message: "Dashboard failed",
+        error: error instanceof Error ? error.message : "Unknown error"
+      },
       { status: 500 }
     );
   }

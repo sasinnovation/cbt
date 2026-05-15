@@ -18,3 +18,4 @@ export function exportResult(format: "pdf" | "json", data: any) {
   if (format === "json") return JSON.stringify(data, null, 2)
   return "PDF_EXPORT_PLACEHOLDER"
 }
+

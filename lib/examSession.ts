@@ -20,3 +20,4 @@ export function submitAnswer(session: any, questionId: string, answer: string) {
 export function isExamFinished(session: any, exam: any) {
   return session.currentIndex >= exam.questions.length
 }
+

@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     // Get student info
     const student = await prisma.student.findUnique({
-      where: { userId: decoded.id },
+      where: { userId: decoded.userId },
     });
 
     if (!student) {
@@ -75,29 +75,71 @@ export async function POST(req: NextRequest) {
     }
 
     // Create exam submission
-    const submission = await prisma.examSubmission.create({
-      data: {
-        studentId: student.id,
-        examId,
-        answers: JSON.stringify(answerDetails),
-        score: totalScore,
-        totalMarks: exam.totalMarks,
-        timeSpent: timeSpent || 0,
-        status: "SUBMITTED",
+    
+
+
+
+
+const submission = await prisma.examSubmission.create({
+  data: {
+    answers: JSON.stringify(answerDetails),
+    score: totalScore,
+    totalMarks: exam.totalMarks,
+    percentage: (totalScore / exam.totalMarks) * 100,
+    grade:
+      totalScore >= 70
+        ? "A"
+        : totalScore >= 60
+        ? "B"
+        : totalScore >= 50
+        ? "C"
+        : "F",
+
+    timeSpent: Number(timeSpent || 0),
+    status: "SUBMITTED",
+
+    student: {
+      connect: {
+        id: String(student.id),
       },
-    });
+    },
+
+    exam: {
+      connect: {
+        id: String(examId),
+      },
+    },
+  },
+});
+
+
+
+
+
 
     // Create result record
+    const resultPercentage = (totalScore / exam.totalMarks) * 100;
+    const resultGrade =
+      totalScore >= exam.totalMarks * 0.7
+        ? "A"
+        : totalScore >= exam.totalMarks * 0.6
+        ? "B"
+        : totalScore >= exam.totalMarks * 0.5
+        ? "C"
+        : "F";
+
     const result = await prisma.result.create({
       data: {
         studentId: student.id,
-        examId,
+        examId: examId,
         schoolId: student.schoolId,
         score: totalScore,
         totalMarks: exam.totalMarks,
-        percentage: (totalScore / exam.totalMarks) * 100,
-        grade: calculateGrade((totalScore / exam.totalMarks) * 100),
+        percentage: resultPercentage,
+        grade: resultGrade,
         status: "COMPLETED",
+        answers: JSON.stringify(answerDetails),
+        timeSpent: Number(timeSpent || 0),
       },
     });
 
@@ -129,3 +171,14 @@ function calculateGrade(percentage: number): string {
   if (percentage >= 60) return "D";
   return "F";
 }
+
+
+
+
+
+
+
+
+
+
+

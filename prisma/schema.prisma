@@ -25,156 +25,174 @@ enum QuestionType {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  fullName  String?
-  role      Role     @default(STUDENT)
+  teacher  Teacher?
+  id       String   @id @default(uuid())
+  email    String   @unique
+  password String
+  fullName String?
+  role     Role     @default(STUDENT)
 
-  student   Student?
-  teacher   Teacher?
+  student Student?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   @@index([email])
 }
 
 model School {
-  id          String      @id @default(uuid())
-  name        String
-  shortCode   String      @unique
-  motto       String?
-  address     String?
-  principal   String?
-  logoUrl     String?
-  bannerUrl   String?
-  theme       String?     // JSON string or color hex
+  teachers   Teacher[]
+  centers    CBTCenter[]
+  payments   Payment[]
+  subjects   Subject[]
+  classRooms ClassRoom[]
+  id         String      @id @default(uuid())
+  name       String
+  shortCode  String      @unique
+  motto      String?
+  address    String?
+  principal  String?
+  logoUrl    String?
+  bannerUrl  String?
+  theme      String? // JSON string or color hex
 
-  students    Student[]
-  teachers    Teacher[]
-  exams       Exam[]
-  results     Result[]
-  auditLogs   AuditLog[]
+  students  Student[]
+  exams     Exam[]
+  results   Result[]
+  auditLogs AuditLog[]
 
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  deletedAt   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([shortCode])
 }
 
 model Student {
-  id           String       @id @default(uuid())
-  userId       String       @unique
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  schoolId     String
-  school       School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
-  studentNo    String?
+  studentNo    String? @unique
   dob          DateTime?
   gender       String?
   profileImage String?
+  parentName   String?
+  parentPhone  String?
+  parentEmail  String?
+  address      String?
 
-  results      Result[]
-  sessions     Session[]
+  results  Result[]
+  sessions Session[]
 
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  deletedAt    DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+  ClassRoom      ClassRoom?       @relation(fields: [classRoomId], references: [id])
+  classRoomId    String?
+  Payment        Payment[]
+  ExamSubmission ExamSubmission[]
 
   @@index([studentNo])
 }
 
 model Teacher {
-  id           String    @id @default(uuid())
-  userId       String    @unique
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  schoolId     String
-  school       School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
-  employeeNo   String?
-  department   String?
+  employeeNo String?
+  department String?
+  classRoom  ClassRoom? @relation(fields: [classRoomId], references: [id])
+  classRoomId String?
 
-  exams        Exam[]
+  exams Exam[]
 
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  deletedAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model ClassRoom {
-  id        String    @id @default(uuid())
-  name      String
-  schoolId  String
-  school    School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  students Student[]
+  teachers Teacher[]
+  id       String    @id @default(uuid())
+  name     String
+  schoolId String
+  school   School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
-  students  Student[]
-  subjects  Subject[]
+  subjects Subject[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Subject {
-  id        String    @id @default(uuid())
-  name      String
-  code      String?   @unique
-  schoolId  String
-  school    School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  id       String  @id @default(uuid())
+  name     String
+  code     String? @unique
+  schoolId String
+  school   School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
-  exams     Exam[]
+  exams Exam[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  ClassRoom   ClassRoom? @relation(fields: [classRoomId], references: [id])
+  classRoomId String?
 }
 
 model Exam {
-  id             String      @id @default(uuid())
-  title          String
-  description    String?
-  schoolId       String
-  school         School      @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  createdById    String?
-  createdBy      Teacher?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  createdById String?
+  createdBy   Teacher? @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
-  subjectId      String?
-  subject        Subject?    @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  subjectId String?
+  subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
 
-  duration       Int         // seconds
-  totalMarks     Float       @default(0)
-  startAt        DateTime?
-  endAt          DateTime?
-  randomized     Boolean     @default(false)
-  status         String      @default("DRAFT")
+  duration   Int // seconds
+  totalMarks Float     @default(0)
+  startAt    DateTime?
+  endAt      DateTime?
+  randomized Boolean   @default(false)
+  status     String    @default("DRAFT")
 
-  questions      Question[]
-  results        Result[]
-  sessions       Session[]
+  questions Question[]
+  results   Result[]
+  sessions  Session[]
 
-  antiCheatScore Float?      // computed
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  antiCheatScore Float? // computed
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   deletedAt      DateTime?
+  ExamSubmission ExamSubmission[]
 
   @@index([schoolId])
   @@index([startAt, endAt])
 }
 
 model Question {
-  id            String       @id @default(uuid())
-  examId        String
-  exam          Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  examId String
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
 
-  content       String
-  type          QuestionType @default(MULTIPLE_CHOICE)
-  marks         Float        @default(1)
-  explanation   String?
-  imageUrl      String?
-  audioUrl      String?
+  content     String
+  type        QuestionType @default(MULTIPLE_CHOICE)
+  marks       Float        @default(1)
+  explanation String?
+  imageUrl    String?
+  audioUrl    String?
 
   // legacy fields to avoid breaking existing code
   optionA       String?
@@ -183,69 +201,73 @@ model Question {
   optionD       String?
   correctAnswer String?
 
-  options       Option[]
+  options Option[]
 
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Option {
-  id         String  @id @default(uuid())
+  id         String   @id @default(uuid())
   questionId String
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
-  text       String
-  isCorrect  Boolean @default(false)
-  imageUrl   String?
-  order      Int     @default(0)
+  text      String
+  isCorrect Boolean @default(false)
+  imageUrl  String?
+  order     Int     @default(0)
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Session {
-  id                 String   @id @default(uuid())
-  studentId          String
-  student            Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  examId             String
-  exam               Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  deviceSessions DeviceSession[]
+  id             String          @id @default(uuid())
+  studentId      String
+  student        Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  examId         String
+  exam           Exam            @relation(fields: [examId], references: [id], onDelete: Cascade)
 
-  status             String   @default("ACTIVE")
-  startedAt          DateTime @default(now())
-  lastSavedAt        DateTime?
-  completedAt        DateTime?
-  timeTakenSeconds   Int?
-  answersJson        Json?    // store answers as JSON for resume
-  ipAddress          String?
-  deviceInfo         String?
-  tabSwitchCount     Int      @default(0)
-  copyPasteCount     Int      @default(0)
-  antiCheatEvents    Json?
+  status           String    @default("ACTIVE")
+  startedAt        DateTime  @default(now())
+  lastSavedAt      DateTime?
+  completedAt      DateTime?
+  timeTakenSeconds Int?
+  answersJson      Json? // store answers as JSON for resume
+  ipAddress        String?
+  deviceInfo       String?
+  tabSwitchCount   Int       @default(0)
+  copyPasteCount   Int       @default(0)
+  antiCheatEvents  Json?
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  expiresAt          DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  expiresAt DateTime?
 
   @@index([studentId, examId])
 }
 
 model Result {
-  id            String   @id @default(uuid())
-  studentId     String
-  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  examId        String
-  exam          Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
-  schoolId      String
-  school        School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  id        String  @id @default(uuid())
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  examId    String
+  exam      Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  schoolId  String
+  school    School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
   score         Float
   totalMarks    Float
   percentage    Float
-  grade         String?
+  grade         String
+  answers       String
+  timeSpent     Int
+  status        String  @default("SUBMITTED")
   remark        String?
   breakdownJson Json?
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model AuditLog {
@@ -274,22 +296,42 @@ model Payment {
 }
 
 model CBTCenter {
-  id          String   @id @default(uuid())
-  name        String
-  address     String?
-  schoolId    String
-  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  name      String
+  address   String?
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }
 
 model DeviceSession {
-  id          String   @id @default(uuid())
-  sessionId   String
-  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  deviceId    String
-  ipAddress   String?
-  lastSeenAt  DateTime @default(now())
+  id         String   @id @default(uuid())
+  sessionId  String
+  session    Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  deviceId   String
+  ipAddress  String?
+  lastSeenAt DateTime @default(now())
 }
 
 // Prisma doesn't include seed scripts here; run via package.json script
 
+model ExamSubmission {
+  id String @id @default(cuid())
+
+  studentId String
+  examId    String
+
+  answers    String
+  score      Int
+  totalMarks Int
+  percentage Float
+  grade      String
+  timeSpent  Int
+
+  status String @default("SUBMITTED")
+
+  createdAt DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  exam    Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
+}

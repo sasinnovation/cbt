@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     // Get teacher info
     const teacher = await prisma.teacher.findUnique({
-      where: { userId: decoded.id },
+      where: { userId: decoded.userId },
     });
 
     if (!teacher) {
@@ -56,13 +56,14 @@ export async function POST(req: NextRequest) {
         status: "DRAFT",
         questions: {
           create: questions?.map((q: any) => ({
-            text: q.text,
+            content: q.content || q.text,
             marks: q.marks || 1,
-            type: q.type || "MCQ",
+            type: q.type || "MULTIPLE_CHOICE",
             options: {
-              create: q.options?.map((o: any) => ({
+              create: q.options?.map((o: any, index: number) => ({
                 text: o.text,
                 isCorrect: o.isCorrect || false,
+                order: index,
               })),
             },
           })),
@@ -104,7 +105,7 @@ export async function GET(req: NextRequest) {
 
     // Get teacher's exams
     const teacher = await prisma.teacher.findUnique({
-      where: { userId: decoded.id as string },
+      where: { userId: decoded.userId as string },
     });
 
     if (!teacher) {
@@ -132,3 +133,92 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const token = req.headers.get("authorization")?.split(" ")[1];
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const decoded = verifyToken(token);
+    if (!decoded || decoded.role !== "TEACHER") {
+      return NextResponse.json(
+        { error: "Only teachers can update exams" },
+        { status: 403 }
+      );
+    }
+
+    const { examId, status, startAt, endAt } = await req.json();
+
+    if (!examId || !status) {
+      return NextResponse.json(
+        { error: "examId and status required" },
+        { status: 400 }
+      );
+    }
+
+    // Verify exam belongs to teacher
+    const teacher = await prisma.teacher.findUnique({
+      where: { userId: decoded.userId as string },
+    });
+
+    if (!teacher) {
+      return NextResponse.json(
+        { error: "Teacher not found" },
+        { status: 404 }
+      );
+    }
+
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId },
+    });
+
+    if (!exam) {
+      return NextResponse.json({ error: "Exam not found" }, { status: 404 });
+    }
+
+    if (exam.createdById !== teacher.id) {
+      return NextResponse.json(
+        { error: "Unauthorized - you can only update your own exams" },
+        { status: 403 }
+      );
+    }
+
+    // Valid statuses: DRAFT, PUBLISHED, COMPLETED, ARCHIVED
+    const validStatuses = ["DRAFT", "PUBLISHED", "COMPLETED", "ARCHIVED"];
+    if (!validStatuses.includes(status)) {
+      return NextResponse.json(
+        { error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    // Update exam
+    const updatedExam = await prisma.exam.update({
+      where: { id: examId },
+      data: {
+        status,
+        startAt: startAt ? new Date(startAt) : undefined,
+        endAt: endAt ? new Date(endAt) : undefined,
+      },
+      include: {
+        questions: {
+          include: {
+            options: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({ success: true, exam: updatedExam });
+  } catch (error) {
+    console.error("Update exam error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+

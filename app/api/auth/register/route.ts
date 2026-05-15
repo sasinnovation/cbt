@@ -7,7 +7,22 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, fullName, role, schoolCode } = await req.json();
+    const {
+      email,
+      password,
+      fullName,
+      role,
+      schoolCode,
+      studentNo,
+      classRoomId,
+      dob,
+      gender,
+      profileImage,
+      parentName,
+      parentPhone,
+      parentEmail,
+      employeeNo,
+    } = await req.json();
 
     if (!email || !password || !fullName) {
       return NextResponse.json(
@@ -16,11 +31,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
-
     if (existingUser) {
       return NextResponse.json(
         { error: "User already exists" },
@@ -28,18 +41,50 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get school if provided
     let school = null;
     if (schoolCode) {
       school = await prisma.school.findUnique({
         where: { shortCode: schoolCode },
       });
+      if (!school) {
+        return NextResponse.json(
+          { error: "School code not found" },
+          { status: 404 }
+        );
+      }
     }
 
-    // Hash password
-    const hashedPassword = await hash(password, 12);
+    let classRoom = null;
+    if (classRoomId) {
+      classRoom = await prisma.classRoom.findUnique({
+        where: { id: classRoomId },
+      });
+      if (!classRoom || (school && classRoom.schoolId !== school.id)) {
+        return NextResponse.json(
+          { error: "Classroom does not belong to the selected school" },
+          { status: 400 }
+        );
+      }
+    }
 
-    // Create user
+    let generatedStudentNo = studentNo || null;
+    if (!generatedStudentNo && school && role === "STUDENT") {
+      generatedStudentNo = `STU-${school.shortCode}-${Date.now()}`;
+    }
+
+    if (generatedStudentNo) {
+      const existingStudent = await prisma.student.findUnique({
+        where: { studentNo: generatedStudentNo },
+      });
+      if (existingStudent) {
+        return NextResponse.json(
+          { error: "Student number already in use" },
+          { status: 409 }
+        );
+      }
+    }
+
+    const hashedPassword = await hash(password, 12);
     const user = await prisma.user.create({
       data: {
         email,
@@ -53,34 +98,52 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // If role is STUDENT and school exists, create student record
-    if (role === "STUDENT" && school) {
-      await prisma.student.create({
+    let student = null;
+    let teacher = null;
+
+    if (user.role === "STUDENT" && school) {
+      student = await prisma.student.create({
         data: {
           userId: user.id,
           schoolId: school.id,
-          studentId: `STU-${Date.now()}`,
+          studentNo: generatedStudentNo,
+          classRoomId: classRoomId || undefined,
+          dob: dob ? new Date(dob) : undefined,
+          gender: gender || undefined,
+          profileImage: profileImage || undefined,
+          parentName: parentName || undefined,
+          parentPhone: parentPhone || undefined,
+          parentEmail: parentEmail || undefined,
+        },
+        include: {
+          school: true,
+          classRoom: true,
         },
       });
     }
 
-    // If role is TEACHER and school exists, create teacher record
-    if (role === "TEACHER" && school) {
-      await prisma.teacher.create({
+    if (user.role === "TEACHER" && school) {
+      teacher = await prisma.teacher.create({
         data: {
           userId: user.id,
           schoolId: school.id,
-          employeeId: `TCH-${Date.now()}`,
+          employeeNo: employeeNo || `TCH-${school.shortCode}-${Date.now()}`,
+          classRoomId: classRoomId || undefined,
+        },
+        include: {
+          school: true,
+          classRoom: true,
         },
       });
     }
 
-    // Create JWT token
     const token = jwt.sign(
       {
         id: user.id,
         email: user.email,
         role: user.role,
+        studentId: student?.id,
+        teacherId: teacher?.id,
       },
       JWT_SECRET,
       { expiresIn: "7d" }
@@ -95,6 +158,8 @@ export async function POST(req: NextRequest) {
           email: user.email,
           fullName: user.fullName,
           role: user.role,
+          student,
+          teacher,
         },
       },
       { status: 201 }
@@ -107,3 +172,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

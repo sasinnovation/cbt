@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     // Get exams for the user's school
     const student = await prisma.student.findUnique({
-      where: { userId: decoded.id },
+      where: { userId: decoded.userId },
       select: { schoolId: true },
     });
 
@@ -53,3 +53,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+

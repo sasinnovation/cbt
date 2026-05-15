@@ -1,53 +1,85 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { hash, compare } from "bcryptjs";
+import { compare } from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    const { email, password, studentNo } = await req.json();
 
-    if (!email || !password) {
+    if (!((email && password) || studentNo)) {
       return NextResponse.json(
-        { error: "Email and password required" },
+        { error: "Email/password or studentNo required" },
         { status: 400 }
       );
     }
 
-    // Find user by email
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: {
-        student: true,
-        teacher: true,
-      },
-    });
+    let user = null;
+    let student = null;
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
+    if (studentNo && !email) {
+      student = await prisma.student.findUnique({
+        where: { studentNo },
+        include: {
+          user: {
+            include: {
+              student: true,
+              teacher: true,
+            },
+          },
+          school: true,
+          classRoom: true,
+        },
+      });
+
+      if (!student || !student.user) {
+        return NextResponse.json(
+          { error: "Invalid student ID" },
+          { status: 401 }
+        );
+      }
+
+      user = student.user;
+    } else {
+      user = await prisma.user.findUnique({
+        where: { email },
+        include: {
+          student: {
+            include: {
+              school: true,
+              classRoom: true,
+            },
+          },
+          teacher: true,
+        },
+      });
+
+      if (!user) {
+        return NextResponse.json(
+          { error: "Invalid credentials" },
+          { status: 401 }
+        );
+      }
+
+      const isPasswordValid = await compare(password, user.password);
+      if (!isPasswordValid) {
+        return NextResponse.json(
+          { error: "Invalid credentials" },
+          { status: 401 }
+        );
+      }
+
+      student = user.student || null;
     }
 
-    // Verify password
-    const isPasswordValid = await compare(password, user.password);
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
-    }
-
-    // Create JWT token
     const token = jwt.sign(
       {
         id: user.id,
         email: user.email,
         role: user.role,
-        studentId: user.student?.id,
+        studentId: student?.id,
         teacherId: user.teacher?.id,
       },
       JWT_SECRET,
@@ -62,6 +94,27 @@ export async function POST(req: NextRequest) {
         email: user.email,
         fullName: user.fullName,
         role: user.role,
+        student: student
+          ? {
+              id: student.id,
+              studentNo: student.studentNo,
+              school: student.school
+                ? {
+                    id: student.school.id,
+                    name: student.school.name,
+                    logoUrl: student.school.logoUrl,
+                    bannerUrl: student.school.bannerUrl,
+                    theme: student.school.theme,
+                  }
+                : null,
+              classRoom: student.classRoom
+                ? {
+                    id: student.classRoom.id,
+                    name: student.classRoom.name,
+                  }
+                : null,
+            }
+          : null,
       },
     });
   } catch (error) {
@@ -72,3 +125,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

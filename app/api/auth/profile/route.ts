@@ -16,11 +16,17 @@ export async function GET(req: NextRequest) {
 
     // Get user with student details
     const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
+      where: { id: decoded.userId },
       include: {
         student: {
           include: {
             school: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            classRoom: {
               select: {
                 id: true,
                 name: true,
@@ -60,8 +66,9 @@ export async function GET(req: NextRequest) {
         student: user.student
           ? {
               id: user.student.id,
-              studentId: user.student.studentId,
+              studentNo: user.student.studentNo,
               school: user.student.school,
+              classRoom: user.student.classRoom,
               recentResults: user.student.results,
               averageScore:
                 user.student.results.length > 0
@@ -82,3 +89,6 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+
+

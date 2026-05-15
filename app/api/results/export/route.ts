@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
           include: {
             student: {
               select: {
-                studentId: true,
+                studentNo: true,
                 user: {
                   select: {
                     fullName: true,
@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
         "Date",
       ];
       const rows = exam.results.map((r) => [
-        r.student.studentId,
+        r.student.studentNo,
         r.student.user.fullName,
         r.student.user.email,
         r.score,
@@ -100,7 +100,7 @@ export async function GET(req: NextRequest) {
           duration: exam.duration,
         },
         results: exam.results.map((r) => ({
-          studentId: r.student.studentId,
+          studentNo: r.student.studentNo,
           name: r.student.user.fullName,
           email: r.student.user.email,
           score: r.score,
@@ -119,3 +119,4 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+

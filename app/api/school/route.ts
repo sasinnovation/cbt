@@ -1,9 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { verifyToken } from "@/lib/auth/middleware";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, shortCode } = await req.json();
+    const token = req.headers.get("authorization")?.split(" ")[1];
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const decoded = verifyToken(token);
+    if (!decoded || decoded.role !== "SUPER_ADMIN") {
+      return NextResponse.json(
+        { error: "Unauthorized - super admin access required" },
+        { status: 403 }
+      );
+    }
+
+    const { name, shortCode, motto, address, principal, logoUrl, bannerUrl, theme } = await req.json();
 
     if (!name || !shortCode) {
       return NextResponse.json(
@@ -12,7 +26,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if school already exists
     const existing = await prisma.school.findUnique({
       where: { shortCode },
     });
@@ -28,6 +41,12 @@ export async function POST(req: NextRequest) {
       data: {
         name,
         shortCode,
+        motto: motto || undefined,
+        address: address || undefined,
+        principal: principal || undefined,
+        logoUrl: logoUrl || undefined,
+        bannerUrl: bannerUrl || undefined,
+        theme: theme || undefined,
       },
     });
 
@@ -44,8 +63,47 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const query = new URL(req.url).searchParams;
+    const shortCode = query.get("shortCode");
+
+    if (shortCode) {
+      const school = await prisma.school.findUnique({
+        where: { shortCode },
+        select: {
+          id: true,
+          name: true,
+          shortCode: true,
+          motto: true,
+          address: true,
+          principal: true,
+          logoUrl: true,
+          bannerUrl: true,
+          theme: true,
+        },
+      });
+
+      if (!school) {
+        return NextResponse.json({ error: "School not found" }, { status: 404 });
+      }
+
+      return NextResponse.json({ success: true, school });
+    }
+
+    const token = req.headers.get("authorization")?.split(" ")[1];
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const decoded = verifyToken(token);
+    if (!decoded || !["SUPER_ADMIN", "ADMIN"].includes(decoded.role)) {
+      return NextResponse.json(
+        { error: "Unauthorized - admin access required" },
+        { status: 403 }
+      );
+    }
+
     const schools = await prisma.school.findMany({
       include: {
         _count: {
@@ -67,3 +125,4 @@ export async function GET() {
     );
   }
 }
+
